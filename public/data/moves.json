@@ -1,0 +1,136 @@
+[
+  {
+    "id": "Flamethrower",
+    "name": "Flamethrower",
+    "type": "Fire",
+    "cat": "Special",
+    "power": 90,
+    "acc": 100,
+    "pp": 15,
+    "sec": {
+      "burn": 10
+    }
+  },
+  {
+    "id": "Fire Blast",
+    "name": "Fire Blast",
+    "type": "Fire",
+    "cat": "Special",
+    "power": 120,
+    "acc": 85,
+    "pp": 5,
+    "sec": {
+      "burn": 10
+    }
+  },
+  {
+    "id": "Surf",
+    "name": "Surf",
+    "type": "Water",
+    "cat": "Special",
+    "power": 95,
+    "acc": 100,
+    "pp": 15
+  },
+  {
+    "id": "Ice Beam",
+    "name": "Ice Beam",
+    "type": "Ice",
+    "cat": "Special",
+    "power": 95,
+    "acc": 100,
+    "pp": 10,
+    "sec": {
+      "freeze": 10
+    }
+  },
+  {
+    "id": "Thunderbolt",
+    "name": "Thunderbolt",
+    "type": "Electric",
+    "cat": "Special",
+    "power": 95,
+    "acc": 100,
+    "pp": 15,
+    "sec": {
+      "para": 10
+    }
+  },
+  {
+    "id": "Dragon Claw",
+    "name": "Dragon Claw",
+    "type": "Dragon",
+    "cat": "Physical",
+    "power": 80,
+    "acc": 100,
+    "pp": 15
+  },
+  {
+    "id": "Earthquake",
+    "name": "Earthquake",
+    "type": "Ground",
+    "cat": "Physical",
+    "power": 100,
+    "acc": 100,
+    "pp": 10
+  },
+  {
+    "id": "Shadow Ball",
+    "name": "Shadow Ball",
+    "type": "Ghost",
+    "cat": "Special",
+    "power": 80,
+    "acc": 100,
+    "pp": 15
+  },
+  {
+    "id": "Sludge Bomb",
+    "name": "Sludge Bomb",
+    "type": "Poison",
+    "cat": "Special",
+    "power": 90,
+    "acc": 100,
+    "pp": 10,
+    "sec": {
+      "poison": 30
+    }
+  },
+  {
+    "id": "Growl",
+    "name": "Growl",
+    "type": "Normal",
+    "cat": "Status",
+    "power": 0,
+    "acc": 100,
+    "pp": 40,
+    "stage": {
+      "target": "atk",
+      "delta": -1
+    }
+  },
+  {
+    "id": "Swords Dance",
+    "name": "Swords Dance",
+    "type": "Normal",
+    "cat": "Status",
+    "power": 0,
+    "acc": 0,
+    "pp": 20,
+    "stage": {
+      "target": "atk",
+      "delta": 2
+    }
+  },
+  {
+    "id": "Will-O-Wisp",
+    "name": "Will-O-Wisp",
+    "type": "Fire",
+    "cat": "Status",
+    "power": 0,
+    "acc": 85,
+    "pp": 15,
+    "status": {
+      "burn": true
+    }
+  }
+]

@@ -1,0 +1,103 @@
+[
+  {
+    "id": "Charizard",
+    "name": "Charizard",
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "base": [
+      78,
+      84,
+      78,
+      109,
+      85,
+      100
+    ],
+    "sprite": "/sprites/charizard.png"
+  },
+  {
+    "id": "Blastoise",
+    "name": "Blastoise",
+    "types": [
+      "Water"
+    ],
+    "base": [
+      79,
+      83,
+      100,
+      85,
+      105,
+      78
+    ],
+    "sprite": "/sprites/blastoise.png"
+  },
+  {
+    "id": "Venusaur",
+    "name": "Venusaur",
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "base": [
+      80,
+      82,
+      83,
+      100,
+      100,
+      80
+    ],
+    "sprite": "/sprites/venusaur.png"
+  },
+  {
+    "id": "Gengar",
+    "name": "Gengar",
+    "types": [
+      "Ghost",
+      "Poison"
+    ],
+    "base": [
+      60,
+      65,
+      60,
+      130,
+      75,
+      110
+    ],
+    "sprite": "/sprites/gengar.png"
+  },
+  {
+    "id": "Dragonite",
+    "name": "Dragonite",
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
+    "base": [
+      91,
+      134,
+      95,
+      100,
+      100,
+      80
+    ],
+    "sprite": "/sprites/dragonite.png"
+  },
+  {
+    "id": "Garchomp",
+    "name": "Garchomp",
+    "types": [
+      "Dragon",
+      "Ground"
+    ],
+    "base": [
+      108,
+      130,
+      95,
+      80,
+      85,
+      102
+    ],
+    "sprite": "/sprites/garchomp.png"
+  }
+]
