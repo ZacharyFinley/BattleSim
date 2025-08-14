@@ -1,6 +1,6 @@
-import { GameState } from "@state/GameState";
-import { Button } from "@ui/Button";
-import { effectiveSpeed, endOfTurn, useMove } from "@core/battle";
+import { GameState } from "../state/GameState";
+import { Button } from "../ui/Button";
+import { effectiveSpeed, endOfTurn, useMove } from "../core/battle";
 import Phaser from 'phaser';
 
 export class BattleScene extends Phaser.Scene {

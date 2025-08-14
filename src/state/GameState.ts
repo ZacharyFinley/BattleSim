@@ -1,5 +1,5 @@
-import type { Move, Species, TeamSlot, TypeChart } from "@core/types";
-import { Weather, makePokemon, hydrateMoves, Pokemon } from "@core/battle";
+import type { Move, Species, TeamSlot, TypeChart } from "../core/types";
+import { Weather, makePokemon, hydrateMoves, Pokemon } from "../core/battle";
 
 export const GameState = new (class {
   species: Species[] = [];

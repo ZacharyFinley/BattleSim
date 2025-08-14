@@ -1,6 +1,6 @@
-import { GameState } from "@state/GameState";
-import type { TeamSlot } from "@core/types";
-import { Button } from "@ui/Button";
+import { GameState } from "../state/GameState";
+import type { TeamSlot } from "../core/types";
+import { Button } from "../ui/Button";
 
 export class TeamBuilderScene extends Phaser.Scene {
   idxA = 0; idxB = 0;
