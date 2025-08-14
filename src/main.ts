@@ -19,14 +19,15 @@ class LoaderScene extends Phaser.Scene {
       this.load.image(sp.id, sp.sprite);
     });
   }
-  create() {
-    this.scene.start('TeamBuilder');
+  async create() {
+    await GameState.loadAll();
+    GameState.species.forEach(sp => this.load.image(sp.id, sp.sprite));
+    this.load.once('complete', () => this.scene.start('TeamBuilder'));
+    this.load.start();
   }
 }
 
-async function boot() {
+(async () => {
   const game = new Phaser.Game(config);
-  await GameState.loadAll();
   game.scene.add('Loader', new LoaderScene(), true);
-}
-boot();
+})();
