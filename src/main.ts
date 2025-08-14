@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { TeamBuilderScene } from '@scenes/TeamBuilderScene';
-import { BattleScene } from '@scenes/BattleScene';
-import { GameState } from '@state/GameState';
+import { TeamBuilderScene } from './scenes/TeamBuilderScene';
+import { BattleScene } from './scenes/BattleScene';
+import { GameState } from './state/GameState';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
