@@ -3,10 +3,8 @@ export class Button extends Phaser.GameObjects.Container {
   private label: Phaser.GameObjects.Text;
   private _w: number;
   private _h: number;
+  private _selected = false;
 
-  /**
-   * x, y are CENTER coordinates for convenience.
-   */
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -21,19 +19,16 @@ export class Button extends Phaser.GameObjects.Container {
     this._w = w;
     this._h = h;
 
-    // Position this container by its top-left so hit area is easy (0..w, 0..h)
-    this.setPosition(x - w / 2, y - h / 2);
+    this.setPosition(x, y);
     this.setSize(w, h);
 
-    // Background (top-left origin)
     this.bg = scene.add
       .rectangle(0, 0, w, h, 0x243059)
       .setStrokeStyle(1, 0x37447a)
-      .setOrigin(0, 0);
+      .setOrigin(0.5, 0.5);
 
-    // Label (centered within the button)
     this.label = scene.add
-      .text(w / 2, h / 2, text, {
+      .text(0, 0, text, {
         fontFamily: "system-ui,Segoe UI,Roboto,Arial",
         fontSize: "14px",
         color: "#e7ecf7",
@@ -42,13 +37,12 @@ export class Button extends Phaser.GameObjects.Container {
 
     this.add([this.bg, this.label]);
 
-    // Correct hit area: 0..w / 0..h, relative to container's top-left
     this.setInteractive(
-      new Phaser.Geom.Rectangle(0, 0, w, h),
+      new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h),
       Phaser.Geom.Rectangle.Contains
     )
-      .on("pointerover", () => this.bg.setFillStyle(0x2d3a6e))
-      .on("pointerout", () => this.bg.setFillStyle(0x243059))
+      .on("pointerover", () => !this._selected && this.bg.setFillStyle(0x2d3a6e))
+      .on("pointerout", () => !this._selected && this.bg.setFillStyle(0x243059))
       .on("pointerdown", () => onClick && onClick());
 
     scene.add.existing(this);
@@ -58,14 +52,26 @@ export class Button extends Phaser.GameObjects.Container {
     this.label.setText(t);
   }
 
+  setSelected(sel: boolean) {
+    this._selected = sel;
+    // selected style: brighter fill + accent stroke
+    if (sel) {
+      this.bg.setFillStyle(0x31407f);
+      this.bg.setStrokeStyle(2, 0x7cc7ff);
+    } else {
+      this.bg.setFillStyle(0x243059);
+      this.bg.setStrokeStyle(1, 0x37447a);
+    }
+  }
+
   setDisabled(disabled: boolean) {
     this.setAlpha(disabled ? 0.5 : 1);
-    // Rebind interactability correctly
     if (disabled) {
       this.disableInteractive();
     } else if (!this.input?.enabled) {
+      // IMPORTANT: keep centered hit area when re-enabling
       this.setInteractive(
-        new Phaser.Geom.Rectangle(0, 0, this._w, this._h),
+        new Phaser.Geom.Rectangle(-this._w / 2, -this._h / 2, this._w, this._h),
         Phaser.Geom.Rectangle.Contains
       );
     }
