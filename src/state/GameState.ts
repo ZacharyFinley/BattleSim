@@ -1,7 +1,20 @@
 import type { Move, Species, TeamSlot, TypeChart } from "../core/types";
 import { Weather, makePokemon, hydrateMoves, type Pokemon } from "../core/battle";
 
-const url = (p: string) => new URL(p, document.baseURI).toString();
+// Resolve against <base href> so it works locally AND on GitHub Pages
+const toUrl = (p: string) => new URL(p, document.baseURI).toString();
+
+async function fetchJson(path: string) {
+  const u = toUrl(path) + `?v=${Date.now()}`;
+  const res = await fetch(u, { cache: "no-store" });
+  const txt = await res.text();
+  console.log("[fetchJson]", res.status, u, "bytes:", txt.length);
+  if (!res.ok) throw new Error(`Fetch ${res.status} @ ${u}`);
+  try { return JSON.parse(txt); }
+  catch {
+    throw new Error(`JSON parse failed @ ${u}. First 80 chars: ${txt.slice(0,80)}`);
+  }
+}
 
 export const GameState = new (class {
   species: Species[] = [];
@@ -16,9 +29,9 @@ export const GameState = new (class {
 
   async loadAll() {
     const [sp, mv, ch] = await Promise.all([
-      fetch(url("data/species.json")).then(r => r.json()),
-      fetch(url("data/moves.json")).then(r => r.json()),
-      fetch(url("data/typeChart.json")).then(r => r.json()),
+      fetchJson("data/species.json"),
+      fetchJson("data/moves.json"),
+      fetchJson("data/typeChart.json"),
     ]);
     this.species = sp;
     this.moves   = mv;
@@ -32,9 +45,8 @@ export const GameState = new (class {
   }
 
   initBattleFromTeams() {
-    if (!this.teamA.length || !this.teamB.length) {
+    if (!this.teamA.length || !this.teamB.length)
       throw new Error("Both teams must have at least one Pokémon.");
-    }
     const A0 = makePokemon(this.teamA[0], this.species);
     const B0 = makePokemon(this.teamB[0], this.species);
     hydrateMoves(A0, this.moves);
