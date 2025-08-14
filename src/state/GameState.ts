@@ -3,7 +3,7 @@ import { Weather, makePokemon, hydrateMoves, type Pokemon } from "../core/battle
 
 // Use Vite's base so fetch works both locally and on GitHub Pages (/YourRepo/)
 const BASE = (import.meta as any)?.env?.BASE_URL ?? "/"; // e.g. "/BattleSim/" on Pages
-const url = (p: string) => `${BASE}${p.replace(/^\/+/, "")}`; // ensure no double slash
+const url = (p: string) => new URL(p, document.baseURI).toString(); 
 
 export const GameState = new (class {
   species: Species[] = [];
