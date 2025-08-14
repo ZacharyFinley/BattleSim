@@ -15,8 +15,9 @@ export class SearchSelect extends Phaser.GameObjects.Container {
     super(scene, x, y);
     this.onPick = onPick;
     this.items = items.slice().sort((a,b)=>a.label.localeCompare(b.label));
+    console.log(`SearchSelect created with ${this.items.length} items`);
     this.filtered = this.items.slice();
-
+    console.log(`SearchSelect created with ${this.filtered.length}  filtered items`);
     this.bg = scene.add.rectangle(0,0,w,h,0x0e1124,1).setOrigin(0,0).setStrokeStyle(1,0x2a2f55);
     const title = scene.add.text(10,8,"Select Species",{color:"#e7ecf7", fontSize:"14px"});
     const hint  = scene.add.text(w-10,8,"Esc to close",{color:"#aaa"}).setOrigin(1,0);
@@ -41,19 +42,23 @@ export class SearchSelect extends Phaser.GameObjects.Container {
     if(e.key === "Backspace"){ this.query = this.query.slice(0,-1); this.applyFilter(); return; }
     if(e.key.length === 1){
       this.query += e.key;
+      console.log(`Search query: "${this.query}"`);
       this.applyFilter();
     }
   }
 
   private applyFilter(){
     const q = this.query.trim().toLowerCase();
+    console.log(`Filtering items with query: "${q}"`);
     this.filtered = q ? this.items.filter(i=>i.label.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)) : this.items.slice();
     this.inputText.setText(this.query);
+    console.log(`Filtered items: ${this.filtered.length} matches`);
     this.renderList();
   }
 
   private renderList(){
     this.listWrap.removeAll(true);
+    console.log(`Rendering ${this.filtered.length} items...`);
     const makeBtn = (y:number, text:string, onClick:()=>void)=>{
       const w = (this.bg.width as number) - 20;
       const h = 28;
