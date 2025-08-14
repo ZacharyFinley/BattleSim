@@ -1,107 +1,260 @@
-import { GameState } from "../state/GameState";
-import type { TeamSlot } from "../core/types";
-import { Button } from "../ui/Button";
+import Phaser from "phaser";
+import { GameState } from "@state/GameState";
+import { Button } from "@ui/Button";
+
+type Side = "A" | "B";
 
 export class TeamBuilderScene extends Phaser.Scene {
-  idxA = 0; idxB = 0;
+  idxA = 0;
+  idxB = 0;
 
-  constructor(){ super('TeamBuilder'); }
-
-  async create(){
-    // background
-    this.cameras.main.setBackgroundColor('#0f1226');
-
-    // Title
-    this.add.text(32, 16, 'Team Builder', { color:'#7cc7ff', fontSize:'20px', fontFamily:'system-ui,Segoe UI,Roboto,Arial' });
-
-    // Divider
-    this.add.rectangle(400, 60, 2, 500, 0x2a2f55).setOrigin(0.5,0);
-
-    // Headers
-    this.add.text(100, 60, 'Side A', { color:'#e7ecf7' });
-    this.add.text(520, 60, 'Side B', { color:'#e7ecf7' });
-
-    // Carousels
-    const slotA = this.add.text(160, 60, '', { color:'#aaa' });
-    const slotB = this.add.text(580, 60, '', { color:'#aaa' });
-
-    new Button(this, 60, 60, '◀', 36, 28, ()=>{ this.idxA = (this.idxA+5)%6; this.renderSide('A'); });
-    new Button(this, 260, 60, '▶', 36, 28, ()=>{ this.idxA = (this.idxA+1)%6; this.renderSide('A'); });
-    new Button(this, 480, 60, '◀', 36, 28, ()=>{ this.idxB = (this.idxB+5)%6; this.renderSide('B'); });
-    new Button(this, 680, 60, '▶', 36, 28, ()=>{ this.idxB = (this.idxB+1)%6; this.renderSide('B'); });
-
-    // Store references to update text later
-    (this as any).slotA = slotA; (this as any).slotB = slotB;
-
-    // Confirm
-    new Button(this, 400, 560, 'Confirm Teams → Battle', 260, 40, ()=>{
-      GameState.initBattleFromTeams();
-      this.scene.start('Battle');
-    });
-
-    this.renderSide('A'); this.renderSide('B');
+  constructor() {
+    super("TeamBuilder");
   }
 
-  renderSide(side:'A'|'B'){
-    const xBase = side==='A'? 60 : 480;
-    const idx = side==='A'? this.idxA : this.idxB;
-    const team = side==='A'? GameState.teamA : GameState.teamB;
+  create() {
+    this.cameras.main.setBackgroundColor("#0f1226");
 
-    // Clear old cells for this side
-    this.children.getAll().forEach(obj=>{
-      if((obj as any).__side === side) obj.destroy();
+    this.add.text(32, 16, "Team Builder", {
+      color: "#7cc7ff",
+      fontSize: "20px",
+      fontFamily: "system-ui,Segoe UI,Roboto,Arial",
     });
 
-    const slotText = side==='A' ? (this as any).slotA : (this as any).slotB;
-    slotText.setText(`${idx+1} / 6`);
+    // Divider
+    this.add.rectangle(400, 60, 2, 500, 0x2a2f55).setOrigin(0.5, 0);
+    this.add.text(120, 60, "Side A", { color: "#e7ecf7" });
+    this.add.text(520, 60, "Side B", { color: "#e7ecf7" });
 
-    const slot = team[idx];
+    // Slot counters under the side labels
+    const countA = this.add.text(200, 60, "", { color: "#aaa" });
+    const countB = this.add.text(600, 60, "", { color: "#aaa" });
+    (this as any).__countA = countA;
+    (this as any).__countB = countB;
 
-    // Panel
-    const panel = this.add.rectangle(xBase, 100, 280, 420, 0x181c33).setOrigin(0,0).setStrokeStyle(1,0x2a2f55);
+    // Arrows
+    new Button(this, 60, 60, "◀", 36, 28, () => this.prev("A"));
+    new Button(this, 260, 60, "▶", 36, 28, () => this.next("A"));
+    new Button(this, 480, 60, "◀", 36, 28, () => this.prev("B"));
+    new Button(this, 680, 60, "▶", 36, 28, () => this.next("B"));
+
+    // Confirm button — enabled only when both sides have ≥ 1 member
+    const confirm = new Button(
+      this,
+      400,
+      560,
+      "Confirm Teams → Battle",
+      260,
+      40,
+      () => {
+        try {
+          GameState.initBattleFromTeams();
+          this.scene.start("Battle");
+        } catch (e) {
+          // Shouldn't happen if the button is gated, but just in case:
+          // eslint-disable-next-line no-console
+          console.warn(e);
+        }
+      }
+    );
+    (this as any).__confirm = confirm;
+
+    // Initial draw (empty-state UIs will render)
+    this.renderSide("A");
+    this.renderSide("B");
+  }
+
+  // Helpers
+  private team(side: Side) {
+    return side === "A" ? GameState.teamA : GameState.teamB;
+  }
+  private index(side: Side) {
+    return side === "A" ? this.idxA : this.idxB;
+  }
+  private setIndex(side: Side, v: number) {
+    if (side === "A") this.idxA = v;
+    else this.idxB = v;
+  }
+
+  private prev(side: Side) {
+    const t = this.team(side);
+    if (t.length <= 1) return; // no wrap when 0 or 1 slot
+    const i = this.index(side);
+    const next = (i - 1 + t.length) % t.length;
+    this.setIndex(side, next);
+    this.renderSide(side);
+  }
+
+  private next(side: Side) {
+    const t = this.team(side);
+    if (t.length <= 1) return; // no wrap when 0 or 1 slot
+    const i = this.index(side);
+    const next = (i + 1) % t.length;
+    this.setIndex(side, next);
+    this.renderSide(side);
+  }
+
+  private normalizeIndex(side: Side) {
+    const t = this.team(side);
+    if (t.length === 0) {
+      this.setIndex(side, 0);
+      return;
+    }
+    const i = this.index(side);
+    if (i >= t.length) this.setIndex(side, t.length - 1);
+  }
+
+  private addMon(side: Side) {
+    const t = this.team(side);
+    if (t.length >= 6) return;
+    t.push(GameState.defaultSlot());
+    this.setIndex(side, t.length - 1);
+    this.renderSide(side);
+  }
+
+  private removeMon(side: Side) {
+    const t = this.team(side);
+    if (t.length === 0) return;
+    t.splice(this.index(side), 1);
+    this.normalizeIndex(side);
+    this.renderSide(side);
+  }
+
+  private updateCounts() {
+    const countA = (this as any).__countA as Phaser.GameObjects.Text;
+    const countB = (this as any).__countB as Phaser.GameObjects.Text;
+    // They asked for "0/0" style when empty. We'll show "<currentIndex+1> / <count>"
+    const fmt = (side: Side) => {
+      const t = this.team(side);
+      if (t.length === 0) return "0 / 0";
+      const i = this.index(side);
+      return `${i + 1} / ${t.length}`;
+    };
+    countA.setText(fmt("A"));
+    countB.setText(fmt("B"));
+
+    const confirm = (this as any).__confirm as Button;
+    confirm.setDisabled(!(GameState.teamA.length > 0 && GameState.teamB.length > 0));
+  }
+
+  renderSide(side: Side) {
+    const xBase = side === "A" ? 60 : 480;
+
+    // Clear previous elements for this side
+    this.children.getAll().forEach((obj) => {
+      if ((obj as any).__side === side) obj.destroy();
+    });
+
+    this.updateCounts();
+
+    const t = this.team(side);
+    if (t.length === 0) {
+      // Empty-state panel with Add button
+      const panel = this.add
+        .rectangle(xBase, 100, 280, 420, 0x181c33)
+        .setOrigin(0, 0)
+        .setStrokeStyle(1, 0x2a2f55);
+      (panel as any).__side = side;
+
+      const label = this.add.text(xBase + 16, 120, "No Pokémon in party.", {
+        color: "#e7ecf7",
+      });
+      (label as any).__side = side;
+
+      const addBtn = new Button(this, xBase + 140, 200, "+ Add Pokémon", 180, 36, () =>
+        this.addMon(side)
+      );
+      (addBtn as any).__side = side;
+
+      return;
+    }
+
+    // Ensure index points to an existing slot
+    this.normalizeIndex(side);
+    const idx = this.index(side);
+    const slot = t[idx];
+
+    const panel = this.add
+      .rectangle(xBase, 100, 280, 420, 0x181c33)
+      .setOrigin(0, 0)
+      .setStrokeStyle(1, 0x2a2f55);
     (panel as any).__side = side;
 
-    // Species dropdown (simple cycling button for brevity)
-    const speciesNames = GameState.species.map(s=>s.id);
-    const currentIdx = Math.max(0, speciesNames.indexOf(slot.speciesId));
-    const label = this.add.text(xBase+16, 120, `Species: ${slot.speciesId}`, { color:'#e7ecf7' });
-    (label as any).__side = side;
+    // Species
+    const speciesNames = GameState.species.map((s) => s.id);
+    const speciesLabel = this.add.text(
+      xBase + 16,
+      120,
+      `Species: ${slot.speciesId}`,
+      { color: "#e7ecf7" }
+    );
+    (speciesLabel as any).__side = side;
 
-    new Button(this, xBase+220, 122, 'Change', 80, 28, ()=>{
-      const next = (speciesNames.indexOf(slot.speciesId)+1) % speciesNames.length;
+    new Button(this, xBase + 220, 122, "Change", 80, 28, () => {
+      const cur = Math.max(0, speciesNames.indexOf(slot.speciesId));
+      const next = (cur + 1) % speciesNames.length;
       slot.speciesId = speciesNames[next];
-      label.setText(`Species: ${slot.speciesId}`);
+      speciesLabel.setText(`Species: ${slot.speciesId}`);
       renderSprite();
-    }).setDepth(1);
+    });
 
     // Level
-    const lvlLabel = this.add.text(xBase+16, 160, `Level: ${slot.level}`, { color:'#e7ecf7' });
+    const lvlLabel = this.add.text(xBase + 16, 160, `Level: ${slot.level}`, {
+      color: "#e7ecf7",
+    });
     (lvlLabel as any).__side = side;
-    new Button(this, xBase+220, 162, '+', 36, 28, ()=>{ slot.level = Math.min(100, slot.level+1); lvlLabel.setText(`Level: ${slot.level}`); });
-    new Button(this, xBase+180, 162, '-', 36, 28, ()=>{ slot.level = Math.max(1, slot.level-1); lvlLabel.setText(`Level: ${slot.level}`); });
+    new Button(this, xBase + 220, 162, "+", 36, 28, () => {
+      slot.level = Math.min(100, slot.level + 1);
+      lvlLabel.setText(`Level: ${slot.level}`);
+    });
+    new Button(this, xBase + 180, 162, "-", 36, 28, () => {
+      slot.level = Math.max(1, slot.level - 1);
+      lvlLabel.setText(`Level: ${slot.level}`);
+    });
 
-    // Moves (cycle buttons)
-    const moveIds = GameState.moves.map(m=>m.id);
-    for(let i=0;i<4;i++){
-      const y = 210 + i*46;
-      const mvLabel = this.add.text(xBase+16, y, `Move ${i+1}: ${slot.moveIds[i]||moveIds[0]}`, { color:'#e7ecf7' });
-      (mvLabel as any).__side = side;
-      new Button(this, xBase+240, y+2, '↻', 28, 28, ()=>{
-        const cur = moveIds.indexOf(slot.moveIds[i]); const next = (cur+1)%moveIds.length;
-        slot.moveIds[i] = moveIds[next];
-        mvLabel.setText(`Move ${i+1}: ${slot.moveIds[i]}`);
+    // Moves
+    const moveIds = GameState.moves.map((m) => m.id);
+    // Ensure slot has exactly 4 moves defined
+    for (let i = 0; i < 4; i++) {
+      if (!slot.moveIds[i]) slot.moveIds[i] = moveIds[i % moveIds.length];
+    }
+
+    for (let i = 0; i < 4; i++) {
+      const y = 210 + i * 46;
+      const label = this.add.text(
+        xBase + 16,
+        y,
+        `Move ${i + 1}: ${slot.moveIds[i]}`,
+        { color: "#e7ecf7" }
+      );
+      (label as any).__side = side;
+      new Button(this, xBase + 240, y + 2, "↻", 28, 28, () => {
+        const curIdx = Math.max(0, moveIds.indexOf(slot.moveIds[i]));
+        const nextIdx = (curIdx + 1) % moveIds.length;
+        slot.moveIds[i] = moveIds[nextIdx];
+        label.setText(`Move ${i + 1}: ${slot.moveIds[i]}`);
       });
     }
 
-    // Sprite preview
-    const preview = this.add.image(xBase+140, 480, '').setDisplaySize(96,96);
+    // Sprite preview (placeholder until real art)
+    const preview = this.add.image(xBase + 140, 480, "").setDisplaySize(96, 96);
     (preview as any).__side = side;
-    const renderSprite = ()=>{
-      const s = GameState.species.find(s=>s.id===slot.speciesId)!;
+    const renderSprite = () => {
+      const s = GameState.species.find((s) => s.id === slot.speciesId)!;
       preview.setTexture(s.id).setVisible(true);
     };
-
-    // Ensure texture exists (loaded in preload of main.ts)
     renderSprite();
+
+    // Remove + Add below panel when room
+    if (t.length < 6) {
+      const add = new Button(this, xBase + 60, 520, "+ Add", 80, 30, () =>
+        this.addMon(side)
+      );
+      (add as any).__side = side;
+    }
+    const del = new Button(this, xBase + 200, 520, "Remove", 80, 30, () =>
+      this.removeMon(side)
+    );
+    (del as any).__side = side;
   }
 }
