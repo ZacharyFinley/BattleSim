@@ -47,7 +47,7 @@ export class TeamBuilderScene extends Phaser.Scene {
   private addMon(s:Side){
     const t=this.team(s); if(t.length>=6) return;
     // open search select to choose species before adding
-    const items = GameState.species.map(sp=>({id:sp.id,label:sp.name}));
+    const items = GameState.species.map(sp => ({ id: sp.id, label: sp.name }));
     const overlay = new SearchSelect(this, 220+(s==="A"?0:420), 120, 360, 280, items, (speciesId)=>{
       const moves = GameState.moves.slice(0,4).map(m=>m.id);
       t.push({ speciesId, level:50, moveIds: moves });
